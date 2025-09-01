@@ -25,6 +25,25 @@ async function main() {
       return
     }
 
+    // Test network connectivity first
+    console.log("🔄 Testing network connectivity...")
+    try {
+      const response = await fetch("https://openrouter.ai")
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      console.log("✅ Network connectivity confirmed")
+    } catch (networkError: any) {
+      console.error("❌ Network connectivity test failed:")
+      console.error("🌐 Cannot reach openrouter.ai")
+      console.log("\nPossible solutions:")
+      console.log("1. Check your internet connection")
+      console.log("2. Verify firewall/proxy settings allow access to openrouter.ai")
+      console.log("3. Try disabling VPN temporarily")
+      console.log("4. Check if your network blocks external API calls")
+      return
+    }
+
     console.log("🔄 Testing OpenRouter API connection...")
     
     const completion = await openai.chat.completions.create({
@@ -53,7 +72,14 @@ async function main() {
   } catch (error: any) {
     console.error("❌ Error occurred:")
     
-    if (error.status === 402) {
+    if (error.message && error.message.includes("Connection error")) {
+      console.error("🌐 Connection error - cannot reach OpenRouter API")
+      console.log("\nTroubleshooting steps:")
+      console.log("1. Verify your internet connection is stable")
+      console.log("2. Check if OPENROUTER_BASE_URL in .env is correct (should be https://openrouter.ai)")
+      console.log("3. Ensure firewall/proxy allows access to openrouter.ai")
+      console.log("4. Try running the command again in a few moments")
+    } else if (error.status === 402) {
       console.error("💳 Insufficient credits on your OpenRouter account")
       console.log("\nTo fix this issue:")
       console.log("1. Visit https://openrouter.ai/settings/credits")
@@ -64,8 +90,17 @@ async function main() {
       console.log("\nTo fix this issue:")
       console.log("1. Check your OPENROUTER_API_KEY in the .env file")
       console.log("2. Generate a new API key at https://openrouter.ai/keys")
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      console.error("🌐 Network connection failed")
+      console.log("\nThis usually means:")
+      console.log("1. No internet connection")
+      console.log("2. DNS resolution failed")
+      console.log("3. Firewall blocking the connection")
     } else {
       console.error("🚨 Unexpected error:", error.message)
+      if (error.code) {
+        console.error("Error code:", error.code)
+      }
     }
   }
 }
