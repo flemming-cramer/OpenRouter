@@ -12,7 +12,7 @@ const openai = new OpenAI({
   defaultHeaders: {
     "HTTP-Referer": "https://github.com/OpenRouterTeam/openrouter-examples",
   },
-  // dangerouslyAllowBrowser: true, // Enable this if you used OAuth to fetch a user-scoped `apiKey` above. See https://openrouter.ai/docs#oauth to learn how.
+  // This example is designed to run in Node.js only, not in the browser
 })
 
 async function main() {
